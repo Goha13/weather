@@ -19,6 +19,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import org.json.JSONObject;
@@ -33,6 +34,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private GoogleMap mMap;
 MyTask myTask;
+MyTask myTask2;
+Marker marker;
+private static final String OPEN_WEATHER_MAP_API =
+            "http://api.openweathermap.org/data/2.5/weather?q=Almaty,KZ&units=metric";
+    private static final String OPEN_WEATHER_MAP_API2 =
+            "http://api.openweathermap.org/data/2.5/weather?q=Balkhash,KZ&units=metric";
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,21 +49,23 @@ MyTask myTask;
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         myTask=new MyTask();
-        myTask.execute();
+        myTask.execute(OPEN_WEATHER_MAP_API);
+        myTask2=new MyTask();
+        myTask2.execute(OPEN_WEATHER_MAP_API2);
 
     }
-class MyTask extends AsyncTask<Void,Void,JSONObject>{
-    private static final String OPEN_WEATHER_MAP_API =
-            "http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric";
+class MyTask extends AsyncTask<String,Void,JSONObject>{
+
         @Override
     protected void onPreExecute(){
             super.onPreExecute();
 
         }
         @Override
-    protected JSONObject doInBackground(Void ... voids){
+    protected JSONObject doInBackground(String ... urls){
             try {
-                URL url = new URL(String.format(OPEN_WEATHER_MAP_API, "Balkhash,KZ"));
+                URL url=new URL(urls[0]);
+//                URL url = new URL(String.format(OPEN_WEATHER_MAP_API, "Balkhash,KZ"));
                 HttpURLConnection connection =
                         (HttpURLConnection)url.openConnection();
 
@@ -107,7 +116,24 @@ class MyTask extends AsyncTask<Void,Void,JSONObject>{
                 LatLng sydney = new LatLng(lat2,lon2 );
                 Log.d("Lat==========",lat);
                 mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-                mMap.addMarker(new MarkerOptions().position(sydney).title(temp+" ℃"+pressure+"  hPa").icon(bitmapDescriptorFromVector(MapsActivity.this,R.drawable.sunny)));
+                marker=mMap.addMarker(new MarkerOptions().position(sydney).title(temp+" ℃"+pressure+"  hPa").icon(bitmapDescriptorFromVector(MapsActivity.this,R.drawable.sunny)));
+//                mMap.setInfoWindowAdapter(new GoogleMap.InfoWindowAdapter() {
+//                    @Override
+//                    public View getInfoWindow(Marker marker) {
+//                        if(marker.getId().equals(MapsActivity.this.marker.getId())){
+//                            TextView textView=new TextView(MapsActivity.this);
+//                            textView.setText("Ya ne znayu chto ya delayu");
+//                            textView.setTextColor(Color.RED);
+//                            return textView;
+//                        }else
+//                            return null;
+//                    }
+//
+//                    @Override
+//                    public View getInfoContents(Marker marker) {
+//                        return null;
+//                    }
+//                });
             }catch(Exception e){
                 Log.d("Exception",e.toString());
             }
